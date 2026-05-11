@@ -1,0 +1,75 @@
+﻿@model Tasky.ViewModels.VerifyOtpViewModel
+@{
+    ViewData["Title"] = "Verify OTP";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Tasky</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <script src="~/js/theme.js"></script>
+</head>
+<body class="bg-background text-foreground antialiased">
+
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-sm">
+            <div class="flex items-center justify-center gap-2 mb-8">
+                <div class="relative w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-sm border border-border/40">
+                    <span class="text-primary-foreground text-[22px] font-black font-serif leading-none -mt-[1px]">
+                        T
+                    </span>
+                </div>
+                <div class="flex flex-col leading-none">
+                    <span class="font-extrabold text-[18px] tracking-tight text-sidebar-foreground">
+                        Tasky
+                    </span>
+                </div>
+            </div>
+            <div class="bg-card border border-card-border rounded-2xl p-6 shadow-sm">
+                <h1 class="text-xl font-bold mb-2">Verify OTP</h1>
+
+                <form asp-action="VerifyOtp" method="post" class="space-y-4">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm"></div>
+
+                    <input asp-for="Email" hidden />
+
+                    <div>
+                        <input asp-for="Otp"
+                               placeholder="OTP"
+                               class="w-full h-10 rounded-md border px-3" />
+                        <span asp-validation-for="Otp" class="text-red-500 text-sm"></span>
+                    </div>
+
+                    <div>
+                        <input asp-for="NewPassword"
+                               type="password"
+                               placeholder="New Password"
+                               class="w-full h-10 rounded-md border px-3" />
+                        <span asp-validation-for="NewPassword" class="text-red-500 text-sm"></span>
+                    </div>
+
+                    <div>
+                        <input asp-for="ConfirmPassword"
+                               type="password"
+                               placeholder="Confirm Password"
+                               class="w-full h-10 rounded-md border px-3" />
+                        <span asp-validation-for="ConfirmPassword" class="text-red-500 text-sm"></span>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full h-10 rounded-md bg-primary text-white">
+                        Reset Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

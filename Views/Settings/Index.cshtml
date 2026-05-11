@@ -1,0 +1,107 @@
+﻿@model Tasky.Models.User
+@{
+    ViewData["Title"] = "Settings";
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+    var THEMES = new[] {
+        new { Id = "default", Name = "Indigo", Colors = new[] { "#6366f1", "#818cf8", "#e0e7ff" } },
+        new { Id = "ocean", Name = "Ocean", Colors = new[] { "#0ea5e9", "#38bdf8", "#e0f2fe" } },
+        new { Id = "forest", Name = "Forest", Colors = new[] { "#22c55e", "#4ade80", "#dcfce7" } },
+        new { Id = "sunset", Name = "Sunset", Colors = new[] { "#f97316", "#fb923c", "#fff7ed" } },
+        new { Id = "rose", Name = "Rose", Colors = new[] { "#f43f5e", "#fb7185", "#fff1f2" } },
+        new { Id = "midnight", Name = "Midnight", Colors = new[] { "#7c3aed", "#a78bfa", "#ede9fe" } },
+        new { Id = "slate", Name = "Slate", Colors = new[] { "#475569", "#94a3b8", "#f1f5f9" } },
+        new { Id = "amber", Name = "Amber", Colors = new[] { "#f59e0b", "#fbbf24", "#fffbeb" } },
+        new { Id = "teal", Name = "Teal", Colors = new[] { "#14b8a6", "#2dd4bf", "#f0fdfa" } },
+        new { Id = "crimson", Name = "Crimson", Colors = new[] { "#dc2626", "#f87171", "#fef2f2" } }
+    };
+}
+
+<div class="p-6 max-w-3xl mx-auto space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-foreground">Settings</h1>
+        <p class="text-sm text-muted-foreground mt-0.5">Customize your workspace</p>
+    </div>
+
+    <div class="bg-card border border-card-border rounded-xl p-5">
+        <h2 class="text-base font-semibold text-card-foreground mb-3">Account</h2>
+        @if (isAuthenticated && Model != null)
+        {
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center overflow-hidden">
+                        @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                        {
+                            <img src="@Model.AvatarUrl"
+                                 alt="@Model.UserName"
+                                 class="w-full h-full object-cover" />
+                        }
+                        else
+                        {
+                            <span class="text-primary-foreground text-sm font-bold">
+                                @Model.UserName?.FirstOrDefault().ToString().ToUpper()
+                            </span>
+                        }
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-foreground">@Model.UserName</p>
+                        <p class="text-xs text-muted-foreground">@Model.Email</p>
+                    </div>
+                </div>
+                <a href="/Users/Profile/@Model.Id" class="text-sm text-primary hover:underline">Edit Profile</a>
+            </div>
+        }
+        else
+        {
+            <div class="flex items-center justify-between">
+                <p class="text-sm text-muted-foreground">You're browsing as a guest.</p>
+                <a href="/Identity/Account/Login" class="text-sm text-primary hover:underline">Sign in</a>
+            </div>
+        }
+    </div>
+
+    <div class="bg-card border border-card-border rounded-xl p-5 space-y-5">
+        <h2 class="text-base font-semibold text-card-foreground">Appearance</h2>
+
+        <div>
+            <p class="text-sm font-medium text-foreground mb-3">Mode</p>
+            <div class="flex gap-3">
+                <button id="btn-light-mode" class="mode-btn flex-1 flex flex-col items-center gap-2 py-4 rounded-xl border-2 transition-all border-border hover:border-primary/40">
+                    <i data-lucide="sun" class="w-5 h-5 text-amber-500"></i>
+                    <span class="text-xs font-medium text-foreground">Light</span>
+                    <div class="mode-check hidden w-4 h-4 rounded-full bg-primary items-center justify-center"><i data-lucide="check" class="w-2.5 h-2.5 text-primary-foreground"></i></div>
+                </button>
+                <button id="btn-dark-mode" class="mode-btn flex-1 flex flex-col items-center gap-2 py-4 rounded-xl border-2 transition-all border-border hover:border-primary/40">
+                    <i data-lucide="moon" class="w-5 h-5 text-indigo-400"></i>
+                    <span class="text-xs font-medium text-foreground">Dark</span>
+                    <div class="mode-check hidden w-4 h-4 rounded-full bg-primary items-center justify-center"><i data-lucide="check" class="w-2.5 h-2.5 text-primary-foreground"></i></div>
+                </button>
+            </div>
+        </div>
+
+        <div>
+            <p class="text-sm font-medium text-foreground mb-3">Colour theme</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                @foreach (var theme in THEMES)
+                {
+                    <button class="theme-btn relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all border-border hover:border-primary/40 hover:bg-muted/50" data-theme="@theme.Id">
+                        <div class="flex gap-1">
+                            @foreach (var color in theme.Colors)
+                            {
+                                <div class="w-5 h-5 rounded-full shadow-sm" style="background-color: @color"></div>
+                            }
+                        </div>
+                        <span class="text-xs font-medium text-foreground">@theme.Name</span>
+                        <div class="theme-check hidden absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-primary items-center justify-center">
+                            <i data-lucide="check" class="w-2.5 h-2.5 text-primary-foreground"></i>
+                        </div>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/settings.js" asp-append-version="true"></script>
+}

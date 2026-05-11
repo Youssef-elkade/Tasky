@@ -1,0 +1,196 @@
+﻿@model Tasky.Models.Board
+@{
+    ViewData["Title"] = Model.Title;
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isCreator = Model.CreatorId == currentUserId;
+    var myRole = Model.Members?.FirstOrDefault(m => m.UserId == currentUserId)?.Role?.ToLower();
+    var isAdmin = isCreator || myRole == "owner" || myRole == "admin";
+    var canManage = !Model.IsCollective || isAdmin;
+    var canEdit = !Model.IsCollective || isAdmin || myRole != null;
+}
+
+<div class="flex flex-col h-[calc(100vh-64px)] overflow-hidden">
+    <div class="px-6 py-4 border-b border-border bg-background/80 backdrop-blur-sm flex items-center gap-4 shrink-0">
+        <a asp-controller="Boards" asp-action="Index" class="text-muted-foreground hover:text-foreground transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        </a>
+        <div class="flex-1 min-w-0">
+            <h1 class="text-lg font-bold text-foreground truncate">@(string.IsNullOrEmpty(Model.Title) ? "Untitled Board" : Model.Title)</h1>
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="text-sm text-muted-foreground truncate">@Model.Description</p>
+            }
+        </div>
+        
+        @if (Model.IsCollective)
+        {
+            <button id="toggleMembersBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm transition-all text-muted-foreground hover:bg-muted">
+                <i data-lucide="users" class="w-4 h-4"></i>
+                <span id="membersCountText">@(Model.Members?.Count ?? 0) member@((Model.Members?.Count ?? 0) != 1 ? "s" : "")</span>
+            </button>
+            @if (!isAdmin && myRole == "member")
+            {
+                <span class="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">Member view</span>
+            }
+        }
+
+        @if (canManage)
+        {
+            <button id="addListBtn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                Add List
+            </button>
+        }
+
+        @if (isAdmin)
+        {
+            <button id="deleteBoardBtn" class="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+        }
+    </div>
+
+    <div class="flex flex-1 overflow-hidden relative">
+        <div class="flex-1 overflow-x-auto overflow-y-hidden">
+            <div id="listsContainer" class="flex gap-4 p-6 h-full min-w-max" data-board-id="@Model.Id">
+                @if (Model.Lists != null)
+                {
+                    foreach (var list in Model.Lists.OrderBy(l => l.Position))
+                    {
+                        <partial name="_KanbanColumn" model="list" view-data='new ViewDataDictionary(ViewData) { { "CanEdit", canEdit }, { "CanManage", canManage } }' />
+                    }
+                }
+
+                @if (canManage)
+                {
+                    <div id="newListContainer" class="w-72 shrink-0 hidden bg-muted/50 rounded-xl p-3 h-fit">
+                        <input id="newListTitleInput" placeholder="List name..." class="w-full text-sm font-semibold bg-transparent border-b border-primary outline-none text-foreground mb-2" />
+                        <div class="flex gap-1.5">
+                            <button id="confirmAddListBtn" class="px-2.5 py-1 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity">Add list</button>
+                            <button id="cancelAddListBtn" class="p-1 text-muted-foreground hover:text-foreground rounded-md"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div id="addListTriggerContainer" class="w-72 shrink-0">
+                        <button id="triggerAddListBtn" class="w-full h-16 border-2 border-dashed border-border rounded-xl flex items-center justify-center gap-2 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-all">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            Add list
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if (Model.IsCollective)
+        {
+            <div id="membersPanel" class="w-72 shrink-0 border-l border-border bg-card overflow-y-auto flex-col hidden">
+                <div class="px-4 py-3 border-b border-border flex items-center justify-between">
+                    <h3 class="text-sm font-semibold text-foreground">Members</h3>
+                    <button id="closeMembersBtn" class="p-1 rounded hover:bg-muted transition-colors">
+                        <i data-lucide="x" class="w-4 h-4 text-muted-foreground"></i>
+                    </button>
+                </div>
+
+                <div class="flex-1 p-4 space-y-3">
+                    <div id="membersListContainer" class="space-y-3">
+                        @if (Model.Members == null || !Model.Members.Any())
+                        {
+                            <p class="text-sm text-muted-foreground text-center py-4">No members yet</p>
+                        }
+                        else
+                        {
+                            foreach (var member in Model.Members)
+                            {
+                                var isOwner = member.UserId == Model.CreatorId;
+                                <div class="member-item flex items-center gap-2.5 group" data-user-id="@member.UserId">
+                                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0 overflow-hidden">
+                                        @member.User?.UserName?.Substring(0, 1).ToUpper()
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-1.5">
+                                            <p class="text-sm font-medium text-foreground truncate">@member.User?.UserName</p>
+                                            @if (isOwner)
+                                            {
+                                                <span class="inline-flex items-center gap-0.5 text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-full font-medium shrink-0 leading-none">
+                                                    <i data-lucide="crown" class="w-2.5 h-2.5"></i> Owner
+                                                </span>
+                                            }
+                                            else if (member.Role?.ToLower() == "admin")
+                                            {
+                                                <span class="inline-flex items-center gap-0.5 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium shrink-0 leading-none">
+                                                    <i data-lucide="shield" class="w-2.5 h-2.5"></i> Admin
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="inline-flex items-center text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full font-medium shrink-0 leading-none">
+                                                    Member
+                                                </span>
+                                            }
+                                        </div>
+                                        <p class="text-xs text-muted-foreground truncate">@member.User?.Email</p>
+                                    </div>
+                                    @if (isAdmin && !isOwner && member.UserId != currentUserId)
+                                    {
+                                        <div class="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 transition-all shrink-0">
+                                            @if (member.Role?.ToLower() == "member")
+                                            {
+                                                <button class="update-role-btn p-1 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary transition-all" data-role="admin">
+                                                    <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="update-role-btn p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-all" data-role="member">
+                                                    <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                                                </button>
+                                            }
+                                            <button class="remove-member-btn p-1 rounded hover:bg-destructive/10 transition-all">
+                                                <i data-lucide="x" class="w-3.5 h-3.5 text-muted-foreground hover:text-destructive"></i>
+                                            </button>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    @if (isAdmin)
+                    {
+                        <div class="pt-3 border-t border-border space-y-2">
+                            <p class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Invite member</p>
+                            <div class="flex gap-1.5">
+                                <input id="inviteMemberInput" placeholder="Email or username" class="flex-1 px-2.5 py-1.5 text-sm border border-input rounded-lg bg-background text-foreground outline-none focus:ring-1 ring-ring" />
+                                <button id="inviteMemberBtn" disabled class="p-2 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-40">
+                                    <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<partial name="_TaskDetailsPanel" model="Model" />
+
+<div id="deleteConfirmModal" class="fixed inset-0 bg-black/40 z-50 hidden items-center justify-center p-4">
+    <div class="bg-background border border-border rounded-xl shadow-2xl w-full max-w-sm overflow-hidden">
+        <div class="p-5">
+            <h3 id="deleteModalTitle" class="text-lg font-bold text-foreground mb-2"></h3>
+            <p id="deleteModalDesc" class="text-sm text-muted-foreground"></p>
+        </div>
+        <div class="p-4 bg-muted/50 border-t border-border flex justify-end gap-2">
+            <button id="cancelDeleteBtn" class="px-4 py-2 rounded-lg text-sm font-medium border border-border bg-background text-muted-foreground hover:text-foreground transition-colors">Cancel</button>
+            <button id="confirmDeleteBtn" class="px-4 py-2 rounded-lg text-sm font-medium bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity">Delete</button>
+        </div>
+    </div>
+</div>
+<form id="antiForgeryForm">
+    @Html.AntiForgeryToken()
+</form>
+@section Scripts {
+    <script src="~/js/board-details.js" asp-append-version="true"></script>
+    <script src="~/js/task-panel.js" asp-append-version="true"></script>
+}

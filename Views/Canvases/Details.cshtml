@@ -1,0 +1,163 @@
+﻿@model Tasky.Models.Canvas
+@{
+    ViewData["Title"] = string.IsNullOrEmpty(Model.Title) ? "Untitled" : Model.Title;
+    var displayTitle = (Model.Title == "Untitled" || string.IsNullOrWhiteSpace(Model.Title)) ? "" : Model.Title;
+}
+
+<link href="~/lib/quill/quill.snow.css" rel="stylesheet" asp-append-version="true">
+
+<style>
+    .ql-container {
+        border: none !important;
+        font-size: 20px;
+        line-height: 1.9;
+    }
+
+    .ql-editor {
+        min-height: 400px;
+        padding: 0 !important;
+        font-size: 20px;
+    }
+
+        .ql-editor.ql-blank::before {
+            color: #9ca3af !important;
+            opacity: 1;
+        }
+
+    .ql-direction-rtl {
+        direction: rtl;
+        text-align: right;
+    }
+
+    .auto-rtl {
+        direction: rtl;
+        text-align: right;
+    }
+
+    .auto-ltr {
+        direction: ltr;
+        text-align: left;
+    }
+</style>
+
+<div class="flex flex-col h-screen bg-background text-foreground">
+
+    <div class="flex items-center gap-1 px-6 py-3 border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-20">
+
+        <a href="/Canvases"
+               class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+               title="Back">
+
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+
+        <div class="w-px h-6 bg-border mx-1"></div>
+
+        <button id="btn-bold"
+                class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                data-format="bold"
+                title="Bold">
+
+            <i data-lucide="bold" class="w-5 h-5"></i>
+        </button>
+
+        <button id="btn-italic"
+                class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                data-format="italic"
+                title="Italic">
+
+            <i data-lucide="italic" class="w-5 h-5"></i>
+        </button>
+
+        <button id="btn-h2"
+                class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                data-format="header"
+                data-value="2"
+                title="Heading">
+
+            <i data-lucide="heading-2" class="w-5 h-5"></i>
+        </button>
+
+        <button id="btn-bullet"
+                class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                data-format="list"
+                data-value="bullet"
+                title="Bullet List">
+
+            <i data-lucide="list" class="w-5 h-5"></i>
+        </button>
+
+        <button id="btn-ordered"
+                class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                data-format="list"
+                data-value="ordered"
+                title="Numbered List">
+
+            <i data-lucide="list-ordered" class="w-5 h-5"></i>
+        </button>
+
+        <button id="btn-code"
+                class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                data-format="code-block"
+                title="Code Block">
+
+            <i data-lucide="code" class="w-5 h-5"></i>
+        </button>
+
+        <button id="btn-rtl"
+                class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                title="RTL">
+
+            <i data-lucide="align-right" class="w-5 h-5"></i>
+        </button>
+
+        <button id="btn-ltr"
+                class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                title="LTR">
+
+            <i data-lucide="align-left" class="w-5 h-5"></i>
+        </button>
+
+        <button id="btn-divider"
+                class="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+                title="Divider">
+
+            <i data-lucide="minus" class="w-5 h-5"></i>
+        </button>
+
+        <div class="ml-auto text-xs font-medium text-muted-foreground"
+             id="saveStatusIndicator">
+
+            Saved
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto bg-background">
+
+        <div class="w-full max-w-6xl mx-auto px-12 py-10">
+
+            <input id="canvasTitleInput"
+                   dir="auto"
+                   value="@displayTitle"
+                   placeholder="Untitled"
+                   class="w-full text-3xl font-semibold text-foreground bg-transparent outline-none placeholder:text-muted-foreground/50 mb-2 pb-4 border-b border-border/30" />
+
+            <input type="hidden"
+                   id="canvasId"
+                   value="@Model.Id" />
+
+            <input type="hidden"
+                   id="canvasContent"
+                   value='@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Content ?? ""))' />
+
+            <div id="editor-container" class="w-full"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script src="~/lib/quill/quill.js" asp-append-version="true"></script>
+
+    <script src="~/js/canvases-editor.js" asp-append-version="true"></script>
+}

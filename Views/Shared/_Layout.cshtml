@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - Tasky</title>
+
+    <link rel="stylesheet"
+          href="~/css/site.css" />
+
+    <script src="~/js/lucide.min.js"></script>
+
+    @RenderSection("Styles", required: false)
+
+</head>
+
+<body class="h-screen overflow-hidden bg-background text-foreground">
+
+    <div class="h-screen overflow-hidden bg-background text-foreground flex">
+
+        <partial name="_Sidebar" />
+
+        <main class="flex-1 overflow-y-auto min-w-0">
+
+            <div class="md:hidden sticky top-0 z-30 flex items-center gap-3 px-4 py-3 bg-background/95 backdrop-blur-sm border-b border-border">
+
+                <button id="sidebarToggle"
+                        class="p-1.5 rounded-lg hover:bg-muted transition-colors"
+                        aria-label="Open menu">
+
+                    <i data-lucide="menu"
+                           class="w-5 h-5 text-foreground">
+                    </i>
+
+                </button>
+
+                <span class="font-bold text-base text-foreground">
+                    Tasky
+                </span>
+
+            </div>
+
+            @RenderBody()
+
+        </main>
+
+    </div>
+
+    <script src="~/js/sidebar.js"></script>
+
+    <script src="~/js/theme.js"></script>
+
+    <script>
+        lucide.createIcons();
+    </script>
+
+    @RenderSection("Scripts", required: false)
+
+</body>
+
+</html>

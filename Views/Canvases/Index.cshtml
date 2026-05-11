@@ -1,0 +1,185 @@
+﻿@model IEnumerable<Tasky.Models.Canvas>
+
+@{
+    ViewData["Title"] = "Canvases";
+
+    var canvases = Model?.ToList() ?? new List<Tasky.Models.Canvas>();
+
+    string GetContentPreview(string content)
+    {
+        if (string.IsNullOrEmpty(content))
+        {
+            return "";
+        }
+
+        string text = System.Text.RegularExpressions.Regex
+            .Replace(content, "<.*?>", String.Empty)
+            .Trim();
+
+        return text.Length > 120
+            ? text.Substring(0, 120) + "…"
+            : text;
+    }
+}
+
+<div class="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
+
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-foreground">
+                Canvases
+            </h1>
+
+            <p class="text-sm text-muted-foreground mt-0.5">
+                Your personal writing spaces
+            </p>
+        </div>
+
+        <button id="createCanvasBtn"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
+
+            <i data-lucide="plus"
+               class="w-3.5 h-3.5"></i>
+
+            New Canvas
+        </button>
+    </div>
+
+    <div class="relative">
+        <i data-lucide="search"
+           class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"></i>
+
+        <input id="canvasSearchInput"
+               placeholder="Search canvases by title or content..."
+               class="w-full pl-9 pr-4 py-2 text-sm border border-input rounded-lg bg-background text-foreground outline-none focus:ring-2 ring-ring" />
+    </div>
+
+    <div id="emptyCanvasesState"
+         class="@(!canvases.Any() ? "flex" : "hidden") flex-col items-center justify-center py-20 text-center">
+
+        <div class="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-4">
+            <i data-lucide="book-open"
+               class="w-6 h-6 text-muted-foreground"></i>
+        </div>
+
+        <h3 class="text-base font-semibold text-foreground mb-1">
+            No canvases yet
+        </h3>
+
+        <p class="text-sm text-muted-foreground mb-4">
+            A canvas is your blank space — write anything you want
+        </p>
+
+        <button id="emptyStateCreateBtn"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
+
+            <i data-lucide="plus"
+               class="w-3.5 h-3.5"></i>
+
+            Create Canvas
+        </button>
+    </div>
+
+    <div id="canvasesGrid"
+         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 @(!canvases.Any() ? "hidden" : "")">
+
+        @foreach (var canvas in canvases)
+        {
+            var preview = GetContentPreview(canvas.Content);
+
+            <div class="canvas-card relative group/sortable"
+                 data-canvas-id="@canvas.Id"
+                 data-title="@(canvas.Title?.ToLower())"
+                 data-content="@(preview.ToLower())">
+
+                <div class="drag-handle absolute top-2 left-2 z-10 cursor-grab active:cursor-grabbing opacity-0 group-hover/sortable:opacity-100 transition-opacity p-1 rounded bg-muted hover:bg-muted/80">
+
+                    <i data-lucide="grip-vertical"
+                       class="w-3 h-3 text-muted-foreground pointer-events-none"></i>
+                </div>
+
+                <a href="/Canvases/Details/@canvas.Id"
+                       class="block bg-card border border-card-border rounded-xl p-5 hover:shadow-md hover:border-primary/30 transition-all group relative min-h-[100px]">
+
+                    <div class="flex items-start justify-between gap-2">
+
+                        <div class="flex items-center gap-2 min-w-0">
+
+                            <i data-lucide="book-open"
+                               class="w-4 h-4 text-primary shrink-0"></i>
+
+                            <h3 class="font-semibold text-card-foreground truncate group-hover:text-primary transition-colors">
+
+                                @(string.IsNullOrEmpty(canvas.Title)
+                                    ? Html.Raw("<span class='italic text-muted-foreground'>Untitled</span>")
+                                    : canvas.Title)
+
+                            </h3>
+                        </div>
+
+                        <button class="delete-canvas-btn opacity-0 group-hover:opacity-100 transition-opacity shrink-0 p-1 rounded hover:bg-destructive/10 relative z-20">
+
+                            <i data-lucide="trash-2"
+                               class="w-3.5 h-3.5 text-muted-foreground hover:text-destructive"></i>
+
+                        </button>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(preview))
+                    {
+                        <p class="text-xs text-muted-foreground mt-3 line-clamp-3 leading-relaxed">
+                            @preview
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="text-xs text-muted-foreground/50 mt-3 italic">
+                            Empty canvas
+                        </p>
+                    }
+
+                </a>
+            </div>
+        }
+
+    </div>
+</div>
+
+<div id="deleteCanvasConfirmModal"
+     class="fixed inset-0 bg-black/40 z-50 hidden items-center justify-center p-4">
+
+    <div class="bg-background border border-border rounded-xl shadow-2xl w-full max-w-sm overflow-hidden">
+
+        <div class="p-5">
+
+            <h3 class="text-lg font-bold text-foreground mb-2">
+                Delete canvas?
+            </h3>
+
+            <p class="text-sm text-muted-foreground">
+                This action cannot be undone. The canvas and all its content will be permanently removed.
+            </p>
+
+        </div>
+
+        <div class="p-4 bg-muted/50 border-t border-border flex justify-end gap-2">
+
+            <button id="cancelDeleteCanvasBtn"
+                    class="px-4 py-2 rounded-lg text-sm font-medium border border-border bg-background text-muted-foreground hover:text-foreground transition-colors">
+
+                Cancel
+            </button>
+
+            <button id="confirmDeleteCanvasBtn"
+                    class="px-4 py-2 rounded-lg text-sm font-medium bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity">
+
+                Delete canvas
+            </button>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/canvases.js" asp-append-version="true"></script>
+}

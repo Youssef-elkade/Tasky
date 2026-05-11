@@ -1,0 +1,168 @@
+@model Tasky.ViewModels.UserProfileViewModel
+@{
+    ViewData["Title"] = $"{Model.Name}'s Profile";
+}
+
+<input type="hidden" id="profileUserId" value="@Model.Id" />
+<div id="validationMessages" class="hidden fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg"></div>
+
+<div class="p-6 max-w-4xl mx-auto space-y-6">
+    <div class="flex flex-col md:flex-row items-start md:items-center gap-8">
+        <div class="relative group shrink-0">
+            <div id="avatarContainer" class="w-40 h-40 rounded-full overflow-hidden flex items-center justify-center @(Model.IsOwnProfile ? "cursor-pointer" : "") transition-all duration-300" style="background-color: #0A66C2;">
+                @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                {
+                    <img id="avatarImage" src="@Model.AvatarUrl" alt="@Model.Name" class="w-full h-full object-cover" />
+                    <span id="avatarInitials" class="hidden text-white text-6xl font-bold">@(Model.Name?.FirstOrDefault().ToString().ToUpper() ?? "U")</span>
+                }
+                else
+                {
+                    <img id="avatarImage" src="" class="hidden w-full h-full object-cover" />
+                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center overflow-hidden">@(Model.Name?.FirstOrDefault().ToString().ToUpper() ?? "U")</div>
+                }
+            </div>
+
+            @if (Model.IsOwnProfile)
+            {
+                <div id="avatarOverlay" class="absolute inset-0 rounded-full bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 cursor-pointer">
+                    <i id="cameraIcon" data-lucide="camera" class="w-8 h-8 text-white mb-2"></i>
+                    <i id="loaderIcon" data-lucide="loader-2" class="w-8 h-8 text-white animate-spin hidden mb-2"></i>
+                    <p class="text-white text-sm font-medium">Change photo</p>
+                </div>
+                <input type="file" id="avatarUploadInput" accept="image/*" class="hidden" />
+            }
+        </div>
+
+        <div class="flex-1">
+            <h1 class="text-4xl font-bold text-foreground" id="displayNameHeader">@Model.Name</h1>
+            <p class="text-lg text-muted-foreground mt-1" id="displayUsernameHeader">@@@Model.Username</p>
+            @if (Model.IsOwnProfile)
+            {
+                <p class="text-sm text-muted-foreground mt-3 px-3 py-1.5 bg-muted rounded-lg inline-block">
+                    @(string.IsNullOrEmpty(Model.AvatarUrl) ? "Click photo to upload" : "Click photo to change")
+                </p>
+            }
+        </div>
+
+        @if (Model.IsOwnProfile)
+        {
+            <div class="flex gap-2 ml-auto">
+                <button id="btn-change-password" class="inline-flex items-center justify-center border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md px-3 py-1.5 text-sm font-medium transition-colors gap-1.5 h-9">
+                    <i data-lucide="key" class="w-3.5 h-3.5"></i>
+                    Change Password
+                </button>
+                <button id="btn-logout" class="inline-flex items-center justify-center border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md px-3 py-1.5 text-sm font-medium transition-colors gap-1.5 h-9">
+                    <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                    Sign out
+                </button>
+            </div>
+        }
+    </div>
+
+    <div class="bg-card border border-card-border rounded-xl p-5 space-y-5">
+        <h2 class="text-base font-semibold text-card-foreground">Profile Information</h2>
+
+        <div class="group editable-field" data-field="name">
+            <p class="text-xs font-medium text-muted-foreground mb-1">Full Name</p>
+            <div class="display-mode flex items-center gap-2">
+                <p class="text-sm text-foreground flex-1 field-value">@(string.IsNullOrEmpty(Model.Name) ? Html.Raw("<span class='italic text-muted-foreground'>Not set</span>") : Model.Name)</p>
+                @if (Model.IsOwnProfile)
+                {
+                    <button class="edit-btn opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-muted">
+                        <i data-lucide="pencil" class="w-3.5 h-3.5 text-muted-foreground"></i>
+                    </button>
+                }
+            </div>
+            <div class="edit-mode hidden items-start gap-2">
+                <input type="text" class="field-input flex-1 text-sm bg-muted rounded-lg px-2 py-1.5 outline-none ring-1 ring-primary" value="@Model.Name" />
+                <button class="save-btn p-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-80"><i data-lucide="check" class="w-3.5 h-3.5"></i></button>
+                <button class="cancel-btn p-1.5 rounded-lg bg-muted text-muted-foreground hover:text-foreground"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+            </div>
+        </div>
+
+        <div class="group editable-field" data-field="username">
+            <p class="text-xs font-medium text-muted-foreground mb-1">Username</p>
+            <div class="display-mode flex items-center gap-2">
+                <p class="text-sm text-foreground flex-1 field-value">@(string.IsNullOrEmpty(Model.Username) ? Html.Raw("<span class='italic text-muted-foreground'>Not set</span>") : Model.Username)</p>
+                @if (Model.IsOwnProfile)
+                {
+                    <button class="edit-btn opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-muted">
+                        <i data-lucide="pencil" class="w-3.5 h-3.5 text-muted-foreground"></i>
+                    </button>
+                }
+            </div>
+            <div class="edit-mode hidden items-start gap-2">
+                <input type="text" class="field-input flex-1 text-sm bg-muted rounded-lg px-2 py-1.5 outline-none ring-1 ring-primary" value="@Model.Username" />
+                <span class="field-validation text-xs text-red-500 hidden"></span>
+                <button class="save-btn p-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-80"><i data-lucide="check" class="w-3.5 h-3.5"></i></button>
+                <button class="cancel-btn p-1.5 rounded-lg bg-muted text-muted-foreground hover:text-foreground"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+            </div>
+        </div>
+
+        <div class="group editable-field" data-field="bio">
+            <p class="text-xs font-medium text-muted-foreground mb-1">Bio</p>
+            <div class="display-mode flex items-center gap-2">
+                <p class="text-sm text-foreground flex-1 field-value whitespace-pre-wrap">@(string.IsNullOrEmpty(Model.Bio) ? Html.Raw("<span class='italic text-muted-foreground'>Not set</span>") : Model.Bio)</p>
+                @if (Model.IsOwnProfile)
+                {
+                    <button class="edit-btn opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-muted">
+                        <i data-lucide="pencil" class="w-3.5 h-3.5 text-muted-foreground"></i>
+                    </button>
+                }
+            </div>
+            <div class="edit-mode hidden items-start gap-2">
+                <textarea class="field-input flex-1 text-sm bg-muted rounded-lg px-2 py-1.5 outline-none ring-1 ring-primary resize-none" rows="3">@Model.Bio</textarea>
+                <button class="save-btn p-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-80"><i data-lucide="check" class="w-3.5 h-3.5"></i></button>
+                <button class="cancel-btn p-1.5 rounded-lg bg-muted text-muted-foreground hover:text-foreground"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+            </div>
+        </div>
+
+        <div>
+            <p class="text-xs font-medium text-muted-foreground mb-1">Email</p>
+            <p class="text-sm text-foreground">@Model.Email</p>
+        </div>
+    </div>
+
+    
+    <div id="passwordModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-card border border-card-border rounded-xl p-6 max-w-md w-full mx-4 shadow-lg">
+            <div class="flex items-center gap-2 mb-4">
+                <i data-lucide="key" class="w-5 h-5 text-primary"></i>
+                <h3 class="text-lg font-bold text-foreground">Change Password</h3>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-medium text-muted-foreground mb-1 block">Current Password</label>
+                    <input type="password" id="currentPassword" class="w-full text-sm bg-muted rounded-lg px-3 py-2 outline-none ring-1 ring-input focus:ring-primary" placeholder="Enter current password" />
+                    <span id="currentPasswordValidation" class="text-xs text-red-500 hidden mt-1 block"></span>
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium text-muted-foreground mb-1 block">New Password</label>
+                    <input type="password" id="newPassword" class="w-full text-sm bg-muted rounded-lg px-3 py-2 outline-none ring-1 ring-input focus:ring-primary" placeholder="Enter new password" />
+                    <span id="newPasswordValidation" class="text-xs text-red-500 hidden mt-1 block"></span>
+                    <p class="text-xs text-muted-foreground mt-1">At least 6 characters, with uppercase, lowercase, and number</p>
+                </div>
+
+                <div>
+                    <label class="text-xs font-medium text-muted-foreground mb-1 block">Confirm New Password</label>
+                    <input type="password" id="confirmPassword" class="w-full text-sm bg-muted rounded-lg px-3 py-2 outline-none ring-1 ring-input focus:ring-primary" placeholder="Confirm new password" />
+                    <span id="confirmPasswordValidation" class="text-xs text-red-500 hidden mt-1 block"></span>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mt-6">
+                <button id="cancelPasswordBtn" class="flex-1 py-2 rounded-lg bg-muted text-muted-foreground hover:text-foreground transition-colors">Cancel</button>
+                <button id="savePasswordBtn" class="flex-1 py-2 rounded-lg bg-primary text-primary-foreground hover:opacity-80 transition-opacity font-medium flex items-center justify-center gap-2">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/profile.js" asp-append-version="true"></script>
+}

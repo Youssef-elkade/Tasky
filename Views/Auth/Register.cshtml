@@ -1,0 +1,100 @@
+﻿@model Tasky.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Create account";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Tasky</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+    <script src="~/js/lucide.min.js"></script>
+    <script src="~/js/theme.js"></script>
+</head>
+<body class="bg-background text-foreground antialiased">
+
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-sm">
+            <div class="flex items-center justify-center gap-2 mb-8">
+                <div class="relative w-10 h-10 rounded-2xl bg-primary flex items-center justify-center shadow-sm border border-border/40">
+                    <span class="text-primary-foreground text-[22px] font-black font-serif leading-none -mt-[1px]">
+                        T
+                    </span>
+                </div>
+                <div class="flex flex-col leading-none">
+                    <span class="font-extrabold text-[18px] tracking-tight text-sidebar-foreground">
+                        Tasky
+                    </span>
+                </div>
+            </div>
+
+            <div class="bg-card border border-card-border rounded-2xl p-6 shadow-sm">
+                <h1 class="text-xl font-bold text-card-foreground mb-1">Create account</h1>
+                <p class="text-sm text-muted-foreground mb-6">Start your workspace today</p>
+
+                <form asp-action="Register" method="post" class="space-y-4">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-[0.8rem] font-medium text-destructive"></div>
+
+                    <div class="space-y-2">
+                        <label asp-for="Name" class="text-sm font-medium leading-none">Full Name</label>
+                        <input asp-for="Name" placeholder="Alex Chen"
+                               class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                        <span asp-validation-for="Name" class="text-[0.8rem] font-medium text-destructive"></span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="Email" class="text-sm font-medium leading-none">Email</label>
+                        <input asp-for="Email" type="email" placeholder="you@example.com"
+                               class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                        <span asp-validation-for="Email" class="text-[0.8rem] font-medium text-destructive"></span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="Username" class="text-sm font-medium leading-none">Username</label>
+                        <input asp-for="Username" placeholder="alexchen"
+                               class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                        <span asp-validation-for="Username" class="text-[0.8rem] font-medium text-destructive"></span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="Password" class="text-sm font-medium leading-none">Password</label>
+                        <input asp-for="Password" type="password" placeholder="••••••••"
+                               class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                        <span asp-validation-for="Password" class="text-[0.8rem] font-medium text-destructive"></span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="ConfirmPassword" class="text-sm font-medium leading-none">Confirm Password</label>
+                        <input asp-for="ConfirmPassword" type="password" placeholder="••••••••"
+                               class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
+                        <span asp-validation-for="ConfirmPassword" class="text-[0.8rem] font-medium text-destructive"></span>
+                    </div>
+
+                    <button type="submit" onclick="this.innerHTML='Creating account...'; this.classList.add('opacity-70');"
+                            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full mt-2">
+                        Create account
+                    </button>
+                </form>
+            </div>
+
+            <p class="text-center text-sm text-muted-foreground mt-4">
+                Already have an account?
+                <a asp-action="Login" class="text-primary hover:underline font-medium">Sign in</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        if (window.lucide) {
+        window.lucide.createIcons();
+        }
+        });
+    </script>
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+</body>
+</html>

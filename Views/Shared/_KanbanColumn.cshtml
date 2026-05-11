@@ -1,0 +1,62 @@
+﻿@model Tasky.Models.TaskList
+@{
+    bool canEdit = (bool)(ViewData["CanEdit"] ?? false);
+    bool canManage = (bool)(ViewData["CanManage"] ?? false);
+}
+
+<div class="kanban-column w-72 shrink-0 bg-muted/50 rounded-xl p-3 flex flex-col gap-2 max-h-[calc(100vh-12rem)] overflow-hidden" data-list-id="@Model.Id">
+    <div class="flex items-center justify-between gap-1">
+        <button class="list-drag-handle p-0.5 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing shrink-0">
+            <i data-lucide="grip-vertical" class="w-3.5 h-3.5"></i>
+        </button>
+        
+        <div class="flex-1 list-title-container">
+            <button class="list-title-display w-full text-sm font-semibold text-foreground text-left truncate" @(canEdit ? "" : "disabled")>
+                @(string.IsNullOrEmpty(Model.Title) ? "Untitled" : Model.Title)
+            </button>
+            <input type="text" class="list-title-input hidden w-full text-sm font-semibold bg-transparent border-b border-primary outline-none text-foreground" value="@Model.Title" />
+        </div>
+
+        <div class="flex items-center gap-1 text-muted-foreground text-xs shrink-0">
+            <span class="task-count">@(Model.Tasks?.Count ?? 0)</span>
+            @if (canManage)
+            {
+                <button class="delete-list-btn ml-1 hover:text-destructive p-0.5"
+                        data-list-id="@Model.Id"
+                        data-list-title="@Model.Title">
+
+                    <i data-lucide="trash-2"
+                           class="w-3.5 h-3.5">
+                    </i>
+
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="tasks-container flex-1 overflow-y-auto space-y-2 pr-0.5 min-h-[10px]">
+        @if (Model.Tasks != null)
+        {
+            foreach (var task in Model.Tasks.OrderBy(t => t.Position))
+            {
+                <partial name="_TaskCard" model="task" />
+            }
+        }
+    </div>
+
+    @if (canEdit)
+    {
+        <div class="inline-task-input hidden bg-card border border-primary/30 rounded-lg p-2.5 shadow-sm mt-1">
+            <input type="text" placeholder="Task name..." class="new-task-input w-full text-sm bg-transparent outline-none text-foreground placeholder:text-muted-foreground" />
+            <div class="flex gap-1.5 mt-2">
+                <button class="confirm-add-task-btn px-2.5 py-1 text-xs font-medium bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity">Add</button>
+                <button class="cancel-add-task-btn px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground rounded-md hover:bg-muted transition-all">Cancel</button>
+            </div>
+        </div>
+
+        <button class="trigger-add-task-btn flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-background rounded-lg px-2 py-1.5 transition-all mt-1">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            Add task
+        </button>
+    }
+</div>

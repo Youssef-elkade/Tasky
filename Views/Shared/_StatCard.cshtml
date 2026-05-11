@@ -1,0 +1,29 @@
+﻿@model dynamic
+
+<div class="bg-card border border-card-border rounded-xl p-5 flex items-center gap-4">
+
+    <div class="w-10 h-10 rounded-lg flex items-center justify-center @Model.Color">
+
+        <i data-lucide="@Model.Icon"
+               class="w-5 h-5 text-white">
+        </i>
+
+    </div>
+
+    <div>
+
+        <div class="text-2xl font-bold text-card-foreground">
+
+            @Model.Value
+
+        </div>
+
+        <div class="text-sm text-muted-foreground">
+
+            @Model.Label
+
+        </div>
+
+    </div>
+
+</div>
