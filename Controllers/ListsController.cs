@@ -27,7 +27,7 @@ namespace Tasky.Controllers
 
             var lists = await _context.Lists
                 .Include(l => l.Board)
-                    .ThenInclude(b => b.Members)
+                    .ThenInclude(b => b!.Members)
                 .Include(l => l.Tasks.OrderBy(t => t.Position))
                 .Where(l =>
                     l.BoardId == null ||
@@ -149,7 +149,7 @@ namespace Tasky.Controllers
         {
             var list = await _context.Lists
                 .Include(l => l.Board)
-                    .ThenInclude(b => b.Members)
+                    .ThenInclude(b => b!.Members)
                 .FirstOrDefaultAsync(l => l.Id == id);
 
             if (list == null)
@@ -187,7 +187,7 @@ namespace Tasky.Controllers
         {
             var list = await _context.Lists
                 .Include(l => l.Board)
-                    .ThenInclude(b => b.Members)
+                    .ThenInclude(b => b!.Members)
                 .FirstOrDefaultAsync(l => l.Id == id);
 
             if (list == null)

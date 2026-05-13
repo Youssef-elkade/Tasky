@@ -45,8 +45,8 @@ namespace Tasky.Controllers
 
             var user = await _userManager.Users
                 .FirstOrDefaultAsync(u =>
-                    u.Email.ToLower() == normalized ||
-                    u.UserName.ToLower() == normalized);
+                    u.Email!.ToLower() == normalized ||
+                    u.UserName!.ToLower() == normalized);
 
             if (user == null)
             {

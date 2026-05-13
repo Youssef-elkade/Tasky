@@ -27,7 +27,7 @@ namespace Tasky.Controllers
 
             var tasks = await _context.Tasks
                 .Include(t => t.List)
-                    .ThenInclude(l => l.Board)
+                    .ThenInclude(l => l!.Board)
                 .Where(t =>
                     t.ListId == null &&
                     (
