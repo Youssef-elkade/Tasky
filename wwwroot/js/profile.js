@@ -141,8 +141,76 @@
     const loaderIcon = document.getElementById('loaderIcon');
     const avatarImage = document.getElementById('avatarImage');
     const avatarInitials = document.getElementById('avatarInitials');
+    const removeAvatarBtn = document.getElementById('removeAvatarBtn');
+    const avatarUploadTrigger = document.getElementById('avatarUploadTrigger');
+
+    const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+    const cancelRemoveAvatarBtn = document.getElementById('cancelRemoveAvatarBtn');
+    const confirmRemoveAvatarBtn = document.getElementById('confirmRemoveAvatarBtn');
+
+    avatarUploadTrigger?.addEventListener('click', () => {
+        fileInput?.click();
+    });
+
+    if (avatarImage?.classList.contains('hidden')) {
+        removeAvatarBtn?.classList.add('hidden');
+    }
 
     avatarOverlay?.addEventListener('click', () => fileInput.click());
+
+    removeAvatarBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+
+        deleteConfirmModal.classList.remove('hidden');
+        deleteConfirmModal.classList.add('flex');
+    });
+
+    cancelRemoveAvatarBtn?.addEventListener('click', () => {
+        deleteConfirmModal.classList.add('hidden');
+        deleteConfirmModal.classList.remove('flex');
+    });
+
+    deleteConfirmModal?.addEventListener('click', (e) => {
+        if (e.target === deleteConfirmModal) {
+            deleteConfirmModal.classList.add('hidden');
+            deleteConfirmModal.classList.remove('flex');
+        }
+    });
+
+    confirmRemoveAvatarBtn?.addEventListener('click', async () => {
+
+        deleteConfirmModal.classList.add('hidden');
+        deleteConfirmModal.classList.remove('flex');
+
+        cameraIcon.classList.add('hidden');
+        loaderIcon.classList.remove('hidden');
+
+        try {
+            const res = await fetch(`/Users/UploadAvatarAjax/${userId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ AvatarUrl: null })
+            });
+
+            if (res.ok) {
+                avatarImage.src = '';
+                avatarImage.removeAttribute('src');
+                avatarImage.classList.add('hidden');
+
+                avatarInitials.classList.remove('hidden');
+
+                removeAvatarBtn?.classList.add('hidden');
+
+                avatarUploadTrigger.textContent = 'Upload photo';
+            }
+        } catch (error) {
+            console.error('Failed to remove avatar', error);
+            alert('Failed to remove photo');
+        } finally {
+            loaderIcon.classList.add('hidden');
+            cameraIcon.classList.remove('hidden');
+        }
+    });
 
     fileInput?.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -160,20 +228,24 @@
         const objectUrl = URL.createObjectURL(file);
 
         img.onload = async () => {
-            
+
             const canvas = document.createElement('canvas');
             const MAX = 256;
             const ratio = Math.min(MAX / img.width, MAX / img.height);
+
             canvas.width = Math.round(img.width * ratio);
             canvas.height = Math.round(img.height * ratio);
 
             const ctx = canvas.getContext('2d');
+
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
             const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
             URL.revokeObjectURL(objectUrl);
 
             try {
-                
+
                 const res = await fetch(`/Users/UploadAvatarAjax/${userId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -181,19 +253,29 @@
                 });
 
                 if (res.ok) {
+
+                    avatarImage.onload = () => {
+                        avatarImage.classList.remove('hidden');
+                        avatarInitials.classList.add('hidden');
+                        removeAvatarBtn?.classList.remove('hidden');
+                    };
+
                     avatarImage.src = dataUrl;
-                    avatarImage.classList.remove('hidden');
-                    avatarInitials.classList.add('hidden');
+
+                    avatarUploadTrigger.textContent = 'Change photo';
                 }
+
             } catch (error) {
                 console.error('Failed to upload', error);
-                alert("Failed to upload photo");
+                alert('Failed to upload photo');
             } finally {
                 loaderIcon.classList.add('hidden');
                 cameraIcon.classList.remove('hidden');
             }
         };
+
         img.src = objectUrl;
+
         e.target.value = '';
     });
 

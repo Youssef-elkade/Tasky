@@ -119,8 +119,12 @@ namespace Tasky.Controllers
             if (user == null)
                 return NotFound();
 
-            if (!string.IsNullOrWhiteSpace(data.AvatarUrl))
-                user.AvatarUrl = data.AvatarUrl;
+            user.AvatarUrl =
+                string.IsNullOrWhiteSpace(data.AvatarUrl) ||
+                data.AvatarUrl == "null" ||
+                data.AvatarUrl == "undefined"
+                    ? null
+                    : data.AvatarUrl;
 
             await _userManager.UpdateAsync(user);
 

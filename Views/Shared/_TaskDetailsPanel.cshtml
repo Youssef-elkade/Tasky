@@ -87,3 +87,21 @@
         <span id="tpSaveStatus" class="text-xs text-muted-foreground">Changes saved automatically</span>
     </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const dueDateInput = document.getElementById("tpDueDate");
+        const today = new Date().toISOString().split("T")[0];
+        dueDateInput.min = today;
+        dueDateInput.addEventListener("change", () => {
+            const selectedDate = new Date(dueDateInput.value);
+
+            const todayDate = new Date();
+            todayDate.setHours(0, 0, 0, 0);
+
+            if (selectedDate < todayDate) {
+                alert("Due date cannot be in the past.");
+                dueDateInput.value = "";
+            }
+        });
+    });
+</script>

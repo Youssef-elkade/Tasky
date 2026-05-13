@@ -10,7 +10,7 @@
     <div class="flex flex-col md:flex-row items-start md:items-center gap-8">
         <div class="relative group shrink-0">
             <div id="avatarContainer" class="w-40 h-40 rounded-full overflow-hidden flex items-center justify-center @(Model.IsOwnProfile ? "cursor-pointer" : "") transition-all duration-300" style="background-color: #0A66C2;">
-                @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                @if (!string.IsNullOrWhiteSpace(Model.AvatarUrl))
                 {
                     <img id="avatarImage" src="@Model.AvatarUrl" alt="@Model.Name" class="w-full h-full object-cover" />
                     <span id="avatarInitials" class="hidden text-white text-6xl font-bold">@(Model.Name?.FirstOrDefault().ToString().ToUpper() ?? "U")</span>
@@ -18,7 +18,7 @@
                 else
                 {
                     <img id="avatarImage" src="" class="hidden w-full h-full object-cover" />
-                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center overflow-hidden">@(Model.Name?.FirstOrDefault().ToString().ToUpper() ?? "U")</div>
+                    <div id="avatarInitials" class="text-white text-6xl font-bold">@(Model.Name?.FirstOrDefault().ToString().ToUpper() ?? "U")</div>
                 }
             </div>
 
@@ -38,9 +38,24 @@
             <p class="text-lg text-muted-foreground mt-1" id="displayUsernameHeader">@@@Model.Username</p>
             @if (Model.IsOwnProfile)
             {
-                <p class="text-sm text-muted-foreground mt-3 px-3 py-1.5 bg-muted rounded-lg inline-block">
-                    @(string.IsNullOrEmpty(Model.AvatarUrl) ? "Click photo to upload" : "Click photo to change")
-                </p>
+                <button id="avatarUploadTrigger"
+                       class="text-sm text-muted-foreground mt-3 px-3 py-1.5 bg-muted rounded-lg inline-block cursor-pointer hover:bg-accent transition-colors">
+                    @(string.IsNullOrWhiteSpace(Model.AvatarUrl) ? "Upload photo" : "Chnage photo")
+                </button>
+                @if (!string.IsNullOrWhiteSpace(Model.AvatarUrl))
+                {
+                    <button id="removeAvatarBtn"
+                            class="text-sm text-muted-foreground mt-3 px-3 py-1.5 bg-muted rounded-lg inline-block">
+                        Remove photo
+                    </button>
+                }
+                else
+                {
+                    <button id="removeAvatarBtn"
+                            class="hidden text-sm text-muted-foreground mt-3 px-3 py-1.5 bg-muted rounded-lg">
+                        Remove photo
+                    </button>
+                }
             }
         </div>
 
@@ -159,6 +174,34 @@
                     Save
                 </button>
             </div>
+        </div>
+    </div>
+</div>
+
+<div id="deleteConfirmModal"
+     class="fixed inset-0 bg-black/40 z-50 hidden items-center justify-center p-4">
+
+    <div class="bg-background border border-border rounded-xl shadow-2xl w-full max-w-sm overflow-hidden">
+        <div class="p-5">
+            <h3 class="text-lg font-bold text-foreground mb-2">
+                Remove profile photo
+            </h3>
+
+            <p class="text-sm text-muted-foreground">
+                Are you sure you want to remove your profile photo?
+            </p>
+        </div>
+
+        <div class="p-4 bg-muted/50 border-t border-border flex justify-end gap-2">
+            <button id="cancelRemoveAvatarBtn"
+                    class="px-4 py-2 rounded-lg text-sm font-medium border border-border bg-background text-muted-foreground hover:text-foreground transition-colors">
+                Cancel
+            </button>
+
+            <button id="confirmRemoveAvatarBtn"
+                    class="px-4 py-2 rounded-lg text-sm font-medium bg-destructive text-destructive-foreground hover:opacity-90 transition-opacity">
+                Remove
+            </button>
         </div>
     </div>
 </div>
